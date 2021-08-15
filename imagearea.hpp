@@ -15,6 +15,8 @@ class ImageArea : public QWidget
   int j = 0;
   bool first_click = true;
   bool finish = false;
+  bool played = false;
+  bool sound = false;
   int counter = 0;
   int threshold = 1000;
   void stabilizeBoard();
@@ -30,6 +32,7 @@ signals:
   void updateScore(int s, int c);
 public slots:
   void start();
+  void setSound(bool enable);
 
 };
 

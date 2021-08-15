@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
   ui->setupUi(this);
   connect(ui->pushButton, &QPushButton::clicked, ui->imagearea, &ImageArea::start);
   connect(ui->imagearea, &ImageArea::updateScore, this, &MainWindow::setScore);
+  connect(ui->actionSound, &QAction::triggered, ui->imagearea, &ImageArea::setSound);
   ui->actionNormal->setChecked(true);
   ui->imagearea->start();
 }

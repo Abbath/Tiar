@@ -95,13 +95,20 @@ void ImageArea::paintEvent(QPaintEvent *e) {
     painter.setPen(Qt::black);
     if(getScore() >= threshold){
       painter.drawText(this->rect(), Qt::AlignCenter, "YOU WON!");
-      player->setMedia(QUrl::fromLocalFile("g.m4a"));
+      if(sound && !played){
+        player->setMedia(QUrl::fromLocalFile("g.mp3"));
+      }
     }else{
       painter.drawText(this->rect(), Qt::AlignCenter, "YOU LOST!");
-      player->setMedia(QUrl::fromLocalFile("a.m4a"));
+      if(sound && !played){
+        player->setMedia(QUrl::fromLocalFile("a.mp3"));
+      }
     }
-    player->setVolume(50);
-    player->play();
+    if(sound && !played){
+      player->setVolume(50);
+      player->play();
+      played = true;
+    }
   }
   e->accept();
 }
@@ -134,9 +141,11 @@ void ImageArea::mousePressEvent(QMouseEvent *e){
       board = ob;
     }else{
       counter += 1;
-      player->setMedia(QUrl::fromLocalFile("p.mp3"));
-      player->setVolume(50);
-      player->play();
+      if(sound){
+        player->setMedia(QUrl::fromLocalFile("p.mp3"));
+        player->setVolume(50);
+        player->play();
+      }
     }
     if(counter == 50){
       finish = true;
@@ -174,9 +183,11 @@ void ImageArea::mouseReleaseEvent(QMouseEvent *e){
       board = ob;
     }else{
       counter += 1;
-      player->setMedia(QUrl::fromLocalFile("p.mp3"));
-      player->setVolume(50);
-      player->play();
+      if(sound){
+        player->setMedia(QUrl::fromLocalFile("p.mp3"));
+        player->setVolume(50);
+        player->play();
+      }
     }
     if(counter == 50){
       finish = true;
@@ -193,10 +204,16 @@ int ImageArea::getScore() {
 
 void ImageArea::start() {
   finish = false;
+  played = false;
   counter = 0;
   board.fill();
   stabilizeBoard();
   board.trios_removed = 0;
   update();
   emit updateScore(0, 0);
+}
+
+void ImageArea::setSound(bool enable)
+{
+  sound = enable;
 }

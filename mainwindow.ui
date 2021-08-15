@@ -81,6 +81,7 @@
      <addaction name="actionHard"/>
     </widget>
     <addaction name="menuDifficulty"/>
+    <addaction name="actionSound"/>
    </widget>
    <addaction name="menuSettings"/>
   </widget>
@@ -107,6 +108,14 @@
    </property>
    <property name="text">
     <string>Hard</string>
+   </property>
+  </action>
+  <action name="actionSound">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Sound</string>
    </property>
   </action>
  </widget>
