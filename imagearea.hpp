@@ -17,8 +17,10 @@ class ImageArea : public QWidget
   bool finish = false;
   bool played = false;
   bool sound = false;
+  bool hints = false;
   int counter = 0;
   int threshold = 1000;
+  double thr = 1.0;
   void stabilizeBoard();
   QMediaPlayer * player;
 public:
@@ -27,11 +29,14 @@ public:
   void mousePressEvent(QMouseEvent*e);
   void mouseReleaseEvent(QMouseEvent*e);
   int getScore();
-  void setThreshold(int value);
+  void setThreshold(double thr);
+  int getThreshold();
+  void setHints(bool newHints);
+
 signals:
   void updateScore(int s, int c);
 public slots:
-  void start();
+  void start(int size);
   void setSound(bool enable);
 
 };

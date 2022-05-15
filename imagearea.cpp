@@ -6,9 +6,19 @@
 #include <QThread>
 #include <QRect>
 
-void ImageArea::setThreshold(int value)
+void ImageArea::setThreshold(double _thr)
 {
-  threshold = value;
+    thr = _thr;
+}
+
+int ImageArea::getThreshold()
+{
+    return threshold;
+}
+
+void ImageArea::setHints(bool newHints)
+{
+  hints = newHints;
 }
 
 void ImageArea::stabilizeBoard() {
@@ -18,16 +28,20 @@ void ImageArea::stabilizeBoard() {
     board.remove_trios();
     board.fill_up();
   }while(!(old_board == board));
+  board.match_patterns();
 }
 
-ImageArea::ImageArea(QWidget *parent) : QWidget(parent) {
+ImageArea::ImageArea(QWidget *parent) : QWidget(parent) , board{10, 10} {
   player = new QMediaPlayer;
 }
 
 void ImageArea::paintEvent(QPaintEvent *e) {
   QPainter painter(this);
-  for(int j = 0; j < 10; ++j){
-    for(int i = 0; i < 10; ++i){
+  painter.fillRect(this->rect(), Qt::gray);
+  int w = this->width() / board.width();
+  int h = this->height() / board.height();
+  for(int j = 0; j < board.width(); ++j){
+    for(int i = 0; i < board.height(); ++i){
       QColor b;
       switch (board.at(i, j)) {
         case 1:
@@ -49,42 +63,50 @@ void ImageArea::paintEvent(QPaintEvent *e) {
           b = Qt::black;
           break;
       }
+      if(hints && board.is_matched(i, j)){
+        QColor bi = QColor(b);
+        bi.setRed(255-bi.red());
+        bi.setGreen(255-bi.green());
+        bi.setBlue(255-bi.blue());
+        painter.fillRect(QRect(j * w, i * h, w , h), bi);
+      }
       painter.setPen(b);
       painter.setBrush(QBrush(b, Qt::SolidPattern));
+
       switch (board.at(i, j)) {
         case 1: {
-          painter.translate(j * this->width() / 10 + 32,  i * this->height() / 10 + 32);
+          painter.translate(j * w + w / 2.0,  i * h + h / 2.0);
           painter.rotate(45);
-          painter.translate(-(j * this->width() / 10 + 32),  -(i * this->height() / 10 + 32));
-          painter.drawEllipse(QRect(j * this->width() / 10 + 10, i * this->height() / 10, this->width() / 10 - 22 , this->height() / 10 - 2));
-          painter.translate(j * this->width() / 10 + 32,  i * this->height() / 10 + 32);
+          painter.translate(-(j * w + w / 2.0),  -(i * h + h / 2.0));
+          painter.drawEllipse(QRect(j * w + w / 4, i * h, w - h / 3 , h - 2));
+          painter.translate(j * w + w / 2.0,  i * h + h / 2.0);
           painter.rotate(-45);
-          painter.translate(-(j * this->width() / 10 + 32),  -(i * this->height() / 10 + 32));
+          painter.translate(-(j * w + w / 2.0),  -(i * h + h / 2.0));
           break;
         }
         case 2: {
-          painter.fillRect(QRect(j * this->width() / 10 + 4, i * this->height() / 10 + 4, this->width() / 10 - 8 , this->height() / 10 - 8), b);
+          painter.fillRect(QRect(j * w + 6, i * h + 6, w - 10 , h - 10), b);
           break;
         }
         case 4: {
-          painter.drawEllipse(QRect(j * this->width() / 10 + 10, i * this->height() / 10 + 2, this->width() / 10 - 22 , this->height() / 10 - 4));
+          painter.drawEllipse(QRect(j * w + w / 4, i * h + 2, w - w / 2 , h - 4));
           break;
         }
         case 5: {
           QPainterPath path;
           QPolygon polygon;
-          polygon << QPoint(j * this->width() / 10 + this->width() / 30, i * this->height() / 10 + 2)
-                  << QPoint(j * this->width() / 10 + 2 * (this->width() / 30), i * this->height() / 10 + 2)
-                  << QPoint((j+1) * this->width() / 10 - 4, i * this->height() / 10 + this->height() / 20)
-                  << QPoint(j * this->width() / 10 + 2 * (this->width() / 30), (i+1) * this->height() / 10 - 4)
-                  << QPoint(j * this->width() / 10 + this->width() / 30, (i+1) * this->height() / 10 - 4)
-                  << QPoint(j * this->width() / 10 + 2, i * this->height() / 10 + this->height() / 20);
+          polygon << QPoint(j * w + w / 3, i * h + 2)
+                  << QPoint(j * w + 2 * w / 3, i * h + 2)
+                  << QPoint((j+1) * w - 4, i * h + h / 2)
+                  << QPoint(j * w + 2 * (w / 3), (i+1) * h - 4)
+                  << QPoint(j * w + w / 3, (i+1) * h - 4)
+                  << QPoint(j * w + 2, i * h + h / 2);
           path.addPolygon(polygon);
           painter.fillPath(path, b);
           break;
         }
         default: {
-          painter.drawEllipse(QRect(j * this->width() / 10 + 4, i * this->height() / 10 + 4, this->width() / 10 - 8 , this->height() / 10 - 8));
+          painter.drawEllipse(QRect(j * w + 4, i * h + 4, w - 8 , h - 8));
           break;
         }
       }
@@ -120,15 +142,15 @@ void ImageArea::mousePressEvent(QMouseEvent *e){
     return;
   }
   auto position = e->pos();
-  int y = position.x() / (this->width() / 10);
-  int x = position.y() / (this->height() / 10);
+  int y = position.x() / (this->width() / board.width());
+  int x = position.y() / (this->height() / board.height());
   if(first_click){
     this->i = x;
     this->j = y;
     first_click = false;
   }else{
     first_click = true;
-    if(!(abs(x - this->i) == 1 ^ abs(y - this->j) == 1)){
+    if(!((abs(x - this->i) == 1) ^ (abs(y - this->j) == 1))){
       return;
     }
     auto ob = board;
@@ -163,14 +185,14 @@ void ImageArea::mouseReleaseEvent(QMouseEvent *e){
     return;
   }
   auto position = e->pos();
-  int y = position.x() / (this->width() / 10);
-  int x = position.y() / (this->height() / 10);
+  int y = position.x() / (this->width() / board.width());
+  int x = position.y() / (this->height() / board.height());
   if (x == this->i && y == this->j){
     return;
   }
   if(!first_click){
     first_click = true;
-    if(!(abs(x - this->i) == 1 ^ abs(y - this->j) == 1)){
+    if(!((abs(x - this->i) == 1) ^ (abs(y - this->j) == 1))){
       return;
     }
     auto ob = board;
@@ -202,10 +224,25 @@ int ImageArea::getScore() {
   return board.trios_removed;
 }
 
-void ImageArea::start() {
+void ImageArea::start(int size) {
+  switch (size) {
+  case 10:
+      threshold = 1000 * thr;
+      break;
+  case 20:
+      threshold = 4000 * thr;
+      break;
+  case 30:
+      threshold = 128000 * thr;
+      break;
+  default:
+      threshold = 1000;
+      break;
+  }
   finish = false;
   played = false;
   counter = 0;
+  board = Board{size, size};
   board.fill();
   stabilizeBoard();
   board.trios_removed = 0;

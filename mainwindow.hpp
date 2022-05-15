@@ -25,7 +25,16 @@ private slots:
 
   void on_actionHard_triggered(bool checked);
 
+  void on_action10x10_triggered(bool checked);
+
+  void on_action20x20_triggered(bool checked);
+
+  void on_action30x30_triggered(bool checked);
+
+  void on_actionHints_triggered(bool checked);
+
 private:
   Ui::MainWindow *ui;
+  int size = 10;
 };
 #endif // MAINWINDOW_HPP
