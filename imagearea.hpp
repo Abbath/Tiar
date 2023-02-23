@@ -6,6 +6,7 @@
 #include <QPaintEvent>
 #include <QMouseEvent>
 #include <QMediaPlayer>
+#include <QMap>
 
 class ImageArea : public QWidget
 {
@@ -22,6 +23,8 @@ class ImageArea : public QWidget
   int threshold = 1000;
   double thr = 1.0;
   void stabilizeBoard();
+  void finished();
+  QList<QPair<QString, int>> scoreboard;
   QMediaPlayer * player;
 public:
   explicit ImageArea(QWidget *parent = nullptr);
@@ -32,6 +35,9 @@ public:
   void setThreshold(double thr);
   int getThreshold();
   void setHints(bool newHints);
+
+  const QList<QPair<QString, int>> &getScoreboard() const;
+  void setScoreboard(const QList<QPair<QString, int>> &newScoreboard);
 
 signals:
   void updateScore(int s, int c);

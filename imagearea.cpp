@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QThread>
 #include <QRect>
+#include <QInputDialog>
 
 void ImageArea::setThreshold(double _thr)
 {
@@ -29,6 +30,24 @@ void ImageArea::stabilizeBoard() {
     board.fill_up();
   }while(!(old_board == board));
   board.match_patterns();
+}
+
+void ImageArea::finished()
+{
+    QString user = QInputDialog::getText(this, "Provide info", "Username");
+    if(!user.isEmpty()){
+        scoreboard.append(qMakePair(user, getScore()));
+    }
+}
+
+const QList<QPair<QString, int>> &ImageArea::getScoreboard() const
+{
+    return scoreboard;
+}
+
+void ImageArea::setScoreboard(const QList<QPair<QString, int>> &newScoreboard)
+{
+    scoreboard = newScoreboard;
 }
 
 ImageArea::ImageArea(QWidget *parent) : QWidget(parent) , board{10, 10} {
@@ -113,7 +132,7 @@ void ImageArea::paintEvent(QPaintEvent *e) {
     }
   }
   if(finish){
-    painter.setFont(QFont(painter.font().family(), 96));
+    painter.setFont(QFont(painter.font().family(), 80));
     painter.setPen(Qt::black);
     if(getScore() >= threshold){
       painter.drawText(this->rect(), Qt::AlignCenter, "YOU WON!");
@@ -171,6 +190,7 @@ void ImageArea::mousePressEvent(QMouseEvent *e){
     }
     if(counter == 50){
       finish = true;
+      finished();
     }
     update();
     emit updateScore(getScore(), counter);
@@ -213,6 +233,7 @@ void ImageArea::mouseReleaseEvent(QMouseEvent *e){
     }
     if(counter == 50){
       finish = true;
+      finished();
     }
     update();
     emit updateScore(getScore(), counter);

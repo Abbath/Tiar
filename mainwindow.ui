@@ -71,7 +71,7 @@
      <x>0</x>
      <y>0</y>
      <width>658</width>
-     <height>21</height>
+     <height>32</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSettings">
@@ -99,7 +99,15 @@
     <addaction name="actionSound"/>
     <addaction name="actionHints"/>
    </widget>
+   <widget class="QMenu" name="menuInfo">
+    <property name="title">
+     <string>Info</string>
+    </property>
+    <addaction name="actionScoreboard"/>
+    <addaction name="actionAbout"/>
+   </widget>
    <addaction name="menuSettings"/>
+   <addaction name="menuInfo"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionEasy">
@@ -109,6 +117,9 @@
    <property name="text">
     <string>Easy</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+1</string>
+   </property>
   </action>
   <action name="actionNormal">
    <property name="checkable">
@@ -116,6 +127,9 @@
    </property>
    <property name="text">
     <string>Normal</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+2</string>
    </property>
   </action>
   <action name="actionHard">
@@ -125,6 +139,9 @@
    <property name="text">
     <string>Hard</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+3</string>
+   </property>
   </action>
   <action name="actionSound">
    <property name="checkable">
@@ -132,6 +149,9 @@
    </property>
    <property name="text">
     <string>Sound</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
    </property>
   </action>
   <action name="action10x10">
@@ -141,6 +161,9 @@
    <property name="text">
     <string>10x10</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+4</string>
+   </property>
   </action>
   <action name="action20x20">
    <property name="checkable">
@@ -148,6 +171,9 @@
    </property>
    <property name="text">
     <string>20x20</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+5</string>
    </property>
   </action>
   <action name="action30x30">
@@ -157,6 +183,9 @@
    <property name="text">
     <string>30x30</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+6</string>
+   </property>
   </action>
   <action name="actionHints">
    <property name="checkable">
@@ -164,6 +193,25 @@
    </property>
    <property name="text">
     <string>Hints</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
+   </property>
+  </action>
+  <action name="actionScoreboard">
+   <property name="text">
+    <string>Scoreboard</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
    </property>
   </action>
  </widget>

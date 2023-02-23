@@ -3,6 +3,7 @@
 
 #include "imagearea.hpp"
 #include <QPushButton>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent)
@@ -15,11 +16,18 @@ MainWindow::MainWindow(QWidget *parent)
   ui->actionNormal->setChecked(true);
   ui->action10x10->setChecked(true);
   ui->imagearea->start(10);
+  readScoreboard();
 }
 
 MainWindow::~MainWindow()
 {
-  delete ui;
+    delete ui;
+}
+
+void MainWindow::closeEvent(QCloseEvent *e)
+{
+    writeScoreboard();
+    e->accept();
 }
 
 void MainWindow::setScore(int s, int c)
@@ -89,5 +97,44 @@ void MainWindow::on_actionHints_triggered(bool checked)
 {
   ui->imagearea->setHints(checked);
   update();
+}
+
+void MainWindow::writeScoreboard()
+{
+    QFile file("scoreboard.dat");
+    file.open(QIODevice::WriteOnly);
+    QDataStream dstream(&file);
+    dstream << ui->imagearea->getScoreboard();
+}
+
+void MainWindow::readScoreboard()
+{
+    QFile file("scoreboard.dat");
+    if(!file.exists()){
+        return;
+    }
+    file.open(QIODevice::ReadOnly);
+    QDataStream dstream(&file);
+    auto sb = QList<QPair<QString, int>>();
+    dstream >> sb;
+    ui->imagearea->setScoreboard(sb);
+}
+
+void MainWindow::on_actionScoreboard_triggered()
+{
+    auto sc = ui->imagearea->getScoreboard();
+    QString s;
+    auto counter = 1;
+    std::sort(sc.begin(), sc.end(), [](const QPair<QString, int>& a, const QPair<QString, int>& b){return a.second > b.second;});
+    for(auto it = sc.begin(); it != sc.end(); ++it){
+        s.append(QString("%1. %2 - %3\n").arg(counter++).arg(it->first).arg(it->second));
+    }
+    QMessageBox::information(this, "Scoreboard", s);
+}
+
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox::information(this, "About", "Three in a row game");
 }
 
