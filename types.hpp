@@ -102,9 +102,11 @@ class Board {
   std::uniform_int_distribution<int> uniform_dist{1, 5};
   std::uniform_int_distribution<int> uniform_dist_2;
   std::uniform_int_distribution<int> uniform_dist_3;
+  std::uniform_int_distribution<int> coin{1, 42};
   int w;
   int h;
   std::set<std::pair<int, int>> matched_patterns;
+  std::set<std::pair<int, int>> magic_tiles;
 public:
   int width() { return w; }
   int height() { return h; }
@@ -120,12 +122,14 @@ public:
     h = b.h;
     board = b.board;
     trios_removed = b.trios_removed;
+    matched_patterns = b.matched_patterns;
   }
   Board operator=(const Board& b){
     w = b.w;
     h = b.h;
     board = b.board;
     trios_removed = b.trios_removed;
+    matched_patterns = b.matched_patterns;
     return *this;
   }
   bool operator==(const Board& a){
@@ -184,6 +188,9 @@ public:
   bool is_matched(int x, int y) {
     return matched_patterns.count({x, y}) > 0;
   }
+  bool is_magic(int x, int y) {
+    return magic_tiles.count({x, y}) > 0;
+  }
   void fill(){
     trios_removed = 0;
     for(auto& x : board){
@@ -227,6 +234,10 @@ public:
       }
       for(int jj = j; jj < j + offset; ++jj){
         at(i, jj) = 0;
+        if (is_magic(i, jj)){
+            trios_removed -= 3;
+            magic_tiles.erase({i, jj});
+        }
         trios_removed += 1;
       }
       if(offset == 5){
@@ -245,6 +256,10 @@ public:
       }
       for(int ii = i; ii < i + offset; ++ii){
         at(ii, j) = 0;
+        if (is_magic(ii, j)){
+            trios_removed -= 3;
+            magic_tiles.erase({ii, j});
+        }
         trios_removed += 1;
       }
       if(offset == 5){
@@ -289,11 +304,18 @@ public:
           for(int k = curr_i; k >= 0; --k){
             if(at(k, j) != 0){
               at(curr_i,j) = at(k, j);
+              if (is_magic(k, j)) {
+                  magic_tiles.erase({k, j});
+                  magic_tiles.insert({curr_i, j});
+              }
               curr_i -= 1;
             }
           }
           for(int k = curr_i; k >= 0; --k){
             at(k, j) = uniform_dist(e1);
+            if (coin(e1) == 1) {
+              magic_tiles.insert({k, j});
+            }
           }
         }
       }

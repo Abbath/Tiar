@@ -12,6 +12,8 @@ class ImageArea : public QWidget
 {
   Q_OBJECT
   Board board;
+  Board old_board;
+  Board changed_board;
   int i = 0;
   int j = 0;
   bool first_click = true;
@@ -23,14 +25,17 @@ class ImageArea : public QWidget
   int threshold = 1000;
   double thr = 1.0;
   void stabilizeBoard();
+  void stepBoard();
   void finished();
   QList<QPair<QString, int>> scoreboard;
   QMediaPlayer * player;
+  int timer_id = 0;
 public:
   explicit ImageArea(QWidget *parent = nullptr);
   void paintEvent(QPaintEvent*e);
   void mousePressEvent(QMouseEvent*e);
   void mouseReleaseEvent(QMouseEvent*e);
+  void timerEvent(QTimerEvent *e);
   int getScore();
   void setThreshold(double thr);
   int getThreshold();

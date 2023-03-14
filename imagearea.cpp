@@ -32,6 +32,12 @@ void ImageArea::stabilizeBoard() {
   board.match_patterns();
 }
 
+void ImageArea::stepBoard() {
+  board.remove_trios();
+  board.fill_up();
+  board.match_patterns();
+}
+
 void ImageArea::finished()
 {
     QString user = QInputDialog::getText(this, "Provide info", "Username");
@@ -50,7 +56,7 @@ void ImageArea::setScoreboard(const QList<QPair<QString, int>> &newScoreboard)
     scoreboard = newScoreboard;
 }
 
-ImageArea::ImageArea(QWidget *parent) : QWidget(parent) , board{10, 10} {
+ImageArea::ImageArea(QWidget *parent) : QWidget(parent) , board{10, 10}, old_board{board}, changed_board{board} {
   player = new QMediaPlayer;
 }
 
@@ -82,6 +88,7 @@ void ImageArea::paintEvent(QPaintEvent *e) {
           b = Qt::black;
           break;
       }
+
       if(hints && board.is_matched(i, j)){
         QColor bi = QColor(b);
         bi.setRed(255-bi.red());
@@ -89,6 +96,7 @@ void ImageArea::paintEvent(QPaintEvent *e) {
         bi.setBlue(255-bi.blue());
         painter.fillRect(QRect(j * w, i * h, w , h), bi);
       }
+
       painter.setPen(b);
       painter.setBrush(QBrush(b, Qt::SolidPattern));
 
@@ -97,7 +105,7 @@ void ImageArea::paintEvent(QPaintEvent *e) {
           painter.translate(j * w + w / 2.0,  i * h + h / 2.0);
           painter.rotate(45);
           painter.translate(-(j * w + w / 2.0),  -(i * h + h / 2.0));
-          painter.drawEllipse(QRect(j * w + w / 4, i * h, w - h / 3 , h - 2));
+          painter.drawEllipse(QRect(j * w + w / 4 - w / 10, i * h, w - h / 3 , h - 2));
           painter.translate(j * w + w / 2.0,  i * h + h / 2.0);
           painter.rotate(-45);
           painter.translate(-(j * w + w / 2.0),  -(i * h + h / 2.0));
@@ -129,6 +137,14 @@ void ImageArea::paintEvent(QPaintEvent *e) {
           break;
         }
       }
+
+      if(board.is_magic(i, j)){
+        QColor bi = QColor(b);
+        bi.setRed(255-bi.red());
+        bi.setGreen(255-bi.green());
+        bi.setBlue(255-bi.blue());
+        painter.fillRect(QRect(j * w + (w * 0.3), i * h + (h * 0.3), w - (w * 0.6), h - (h * 0.6)), bi);
+      }
     }
   }
   if(finish){
@@ -155,7 +171,7 @@ void ImageArea::paintEvent(QPaintEvent *e) {
 }
 
 void ImageArea::mousePressEvent(QMouseEvent *e){
-  if(finish){
+  if(finish || timer_id){
     update();
     e->accept();
     return;
@@ -172,34 +188,42 @@ void ImageArea::mousePressEvent(QMouseEvent *e){
     if(!((abs(x - this->i) == 1) ^ (abs(y - this->j) == 1))){
       return;
     }
-    auto ob = board;
+    old_board = board;
     auto tmp = board.at(x,y);
     board.at(x, y) = board.at(this->i, this->j);
     board.at(this->i, this->j) = tmp;
-    auto nb = board;
-    stabilizeBoard();
-    if(nb == board){
-      board = ob;
-    }else{
-      counter += 1;
-      if(sound){
-        player->setMedia(QUrl::fromLocalFile("p.mp3"));
-        player->setVolume(50);
-        player->play();
-      }
-    }
-    if(counter == 50){
-      finish = true;
-      finished();
-    }
-    update();
-    emit updateScore(getScore(), counter);
+    changed_board = board;
+    timer_id = startTimer(250);
+//    auto ob = board;
+//    auto tmp = board.at(x,y);
+//    board.at(x, y) = board.at(this->i, this->j);
+//    board.at(this->i, this->j) = tmp;
+//    auto nb = board;
+//    stabilizeBoard();
+//    if(nb == board){
+//      board = ob;
+//    }else{
+//      counter += 1;
+//      if(sound){
+//        player->setMedia(QUrl::fromLocalFile("p.mp3"));
+//        player->setVolume(50);
+//        player->play();
+//      }
+//    }
+//    if(counter == 50){
+//      finish = true;
+//      if(getScore() >= threshold) {
+//        finished();
+//      }
+//    }
+//    update();
+//    emit updateScore(getScore(), counter);
   }
   e->accept();
 }
 
 void ImageArea::mouseReleaseEvent(QMouseEvent *e){
-  if(finish){
+  if(finish || timer_id){
     update();
     e->accept();
     return;
@@ -215,29 +239,60 @@ void ImageArea::mouseReleaseEvent(QMouseEvent *e){
     if(!((abs(x - this->i) == 1) ^ (abs(y - this->j) == 1))){
       return;
     }
-    auto ob = board;
+    old_board = board;
     auto tmp = board.at(x,y);
     board.at(x, y) = board.at(this->i, this->j);
     board.at(this->i, this->j) = tmp;
-    auto nb = board;
-    stabilizeBoard();
-    if(nb == board){
-      board = ob;
-    }else{
-      counter += 1;
-      if(sound){
-        player->setMedia(QUrl::fromLocalFile("p.mp3"));
-        player->setVolume(50);
-        player->play();
-      }
-    }
-    if(counter == 50){
-      finish = true;
-      finished();
-    }
-    update();
+    changed_board = board;
+    timer_id = startTimer(250);
+//    auto ob = board;
+//    auto tmp = board.at(x,y);
+//    board.at(x, y) = board.at(this->i, this->j);
+//    board.at(this->i, this->j) = tmp;
+//    auto nb = board;
+//    stabilizeBoard();
+//    if(nb == board){
+//      board = ob;
+//    }else{
+//      counter += 1;
+//      if(sound){
+//        player->setMedia(QUrl::fromLocalFile("p.mp3"));
+//        player->setVolume(50);
+//        player->play();
+//      }
+//    }
+//    if(counter == 50){
+//      finish = true;
+//      if(getScore() >= threshold) {
+//        finished();
+//      }
+//    }
+//    update();
+//    emit updateScore(getScore(), counter);
+  }
+  e->accept();
+}
+
+void ImageArea::timerEvent(QTimerEvent *e) {
+  auto nb = board;
+  stepBoard();
+  if (changed_board == board){
+    killTimer(timer_id);
+    timer_id = 0;
+    board = old_board;
+  } else if (nb == board) {
+    killTimer(timer_id);
+    timer_id = 0;
+    counter += 1;
     emit updateScore(getScore(), counter);
   }
+  if(counter == 50){
+    finish = true;
+    if (getScore() >= threshold) {
+      finished();
+    }
+  }
+  update();
   e->accept();
 }
 
