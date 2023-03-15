@@ -284,6 +284,11 @@ void ImageArea::timerEvent(QTimerEvent *e) {
     killTimer(timer_id);
     timer_id = 0;
     counter += 1;
+    if(sound){
+      player->setMedia(QUrl::fromLocalFile("p.mp3"));
+      player->setVolume(50);
+      player->play();
+    }
     emit updateScore(getScore(), counter);
   }
   if(counter == 50){

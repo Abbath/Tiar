@@ -110,7 +110,7 @@ class Board {
 public:
   int width() { return w; }
   int height() { return h; }
-  int trios_removed = 0;
+  int trios_removed{};
   Board(int _w, int _h) : w{_w}, h{_h} {
     board.resize(w * h);
     std::fill(std::begin(board), std::end(board), 0);
