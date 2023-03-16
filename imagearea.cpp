@@ -189,9 +189,7 @@ void ImageArea::mousePressEvent(QMouseEvent *e){
       return;
     }
     old_board = board;
-    auto tmp = board.at(x,y);
-    board.at(x, y) = board.at(this->i, this->j);
-    board.at(this->i, this->j) = tmp;
+    board.swap(x, y, this->i, this->j);
     changed_board = board;
     timer_id = startTimer(250);
 //    auto ob = board;
@@ -240,9 +238,7 @@ void ImageArea::mouseReleaseEvent(QMouseEvent *e){
       return;
     }
     old_board = board;
-    auto tmp = board.at(x,y);
-    board.at(x, y) = board.at(this->i, this->j);
-    board.at(this->i, this->j) = tmp;
+    board.swap(x, y, this->i, this->j);
     changed_board = board;
     timer_id = startTimer(250);
 //    auto ob = board;

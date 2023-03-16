@@ -123,6 +123,7 @@ public:
     board = b.board;
     trios_removed = b.trios_removed;
     matched_patterns = b.matched_patterns;
+    magic_tiles = b.magic_tiles;
   }
   Board operator=(const Board& b){
     w = b.w;
@@ -130,6 +131,7 @@ public:
     board = b.board;
     trios_removed = b.trios_removed;
     matched_patterns = b.matched_patterns;
+    magic_tiles = b.magic_tiles;
     return *this;
   }
   bool operator==(const Board& a){
@@ -190,6 +192,21 @@ public:
   }
   bool is_magic(int x, int y) {
     return magic_tiles.count({x, y}) > 0;
+  }
+  void swap(int x1, int y1, int x2, int y2) {
+    auto tmp = at(x1,y1);
+    at(x1, y1) = at(x2, y2);
+    at(x2, y2) = tmp;
+
+    if (is_magic(x1, y1)){
+      magic_tiles.erase({x1, y1});
+      magic_tiles.insert({x2, y2});
+    }
+
+    if (is_magic(x2, y2)){
+      magic_tiles.erase({x2, y2});
+      magic_tiles.insert({x1, y1});
+    }
   }
   void fill(){
     trios_removed = 0;
